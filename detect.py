@@ -9,7 +9,7 @@ class Detection:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = YOLO(path_model)
     
-    def predict(self, path_img):
+    def Predict(self, path_img):
         img = Image.open(path_img).convert("RGB")
 
         results = self.model.predict(source=img, save = True, device = self.device)
@@ -50,7 +50,7 @@ class Detection:
     
 a = Detection
 # Call the predict method with an image path
-centroids, confidence = a.predict("./imgs/img3.jpg")
+centroids, confidence = a.Predict("img.jpg")
 
 # Print the centroids and confidence
 print("Centroids:", centroids)
