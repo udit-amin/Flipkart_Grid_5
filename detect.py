@@ -1,57 +1,51 @@
 from ultralytics import YOLO
 from PIL import Image
-import torch
 import shutil
 
 class Detection:
-    def __init__(self, path_model):
-        self.path_model = path_model
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = YOLO(path_model)
-    
-    def Predict(self, path_img):
-        img = Image.open(path_img).convert("RGB")
+    def __init__(self, model_path):
+        self.model = YOLO(model_path)
 
-        results = self.model.predict(source=img, save = True, device = self.device)
-
+    def predict(self, source, device="cuda"):
+        results = self.model.predict(source=source, save=True, device=device)
         for r in results:
             coordinates = (r.boxes.xyxyn).tolist()
             confidence = (r.boxes.conf).tolist()
     
     
         centroids = [[(x1 + x2) / 2, (y1 + y2) / 2] for x1, y1, x2, y2 in coordinates]
+        return centroids
 
-        output_img = Image.open("./runs/segment/predict/image0.jpg")
-        output_img.show()
+    def crop_input_image(self, input_image_path, output_image_path, crop_coordinates):
+        input_img = Image.open(input_image_path)
+        x1, y1, x2, y2 = crop_coordinates
+        cropped_img = input_img.crop((x1, y1, x2, y2))
+        cropped_img.save(output_image_path)
+        return output_image_path  # Return the path to the cropped image
         
+    def show_output_image(self):
+        output_img = Image.open("./runs/segment/predict/cropped_img.jpg")
+        output_img.show()
+
+    def cleanup(self):
         shutil.rmtree("./runs")
 
-        return centroids, confidence
-
-# class Detection:
-#     def __init__(self, path_model):
-#         self.path_model = path_model
-#         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#         self.model = YOLO(path_model)
+# Usage:
+if __name__ == "__main__":
+    detection = Detection("best.pt")
     
-#     def predict(self, img):
-#         results = self.model.predict(source=img, save=True, device=self.device)
+    # Define the coordinates to crop the input image (x1, y1, x2, y2)
+    crop_coordinates = (580, 0 , 1400, 1080)
 
-#         centroids = []
-#         confidence = []
+    # Crop the input image based on predefined coordinates and get the path to the cropped image
+    cropped_image_path = detection.crop_input_image("img9.jpg", "cropped_img.jpg", crop_coordinates)
 
-#         for r in results:
-#             coordinates = (r.boxes.xyxyn).tolist()
-#             conf = (r.boxes.conf).tolist()
-#             centroids.extend([[(x1 + x2) / 2, (y1 + y2) / 2] for x1, y1, x2, y2 in coordinates])
-#             confidence.extend(conf)
-
-#         return centroids, confidence
+    # Perform YOLO detection on the cropped image
+    results = detection.predict(source=cropped_image_path, device="cuda")
+    print(results)
     
-a = Detection
-# Call the predict method with an image path
-centroids, confidence = a.Predict("img.jpg")
+    # Show the YOLO output image
+    detection.show_output_image()
 
-# Print the centroids and confidence
-print("Centroids:", centroids)
-print("Confidence:", confidence)
+    # Cleanup temporary files
+    detection.cleanup()
