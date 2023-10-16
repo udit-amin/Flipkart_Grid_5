@@ -34,15 +34,17 @@ class Detection:
 if __name__ == "__main__":
     detection = Detection("best.pt")
     
+    trolley = [600,430]
     # Define the coordinates to crop the input image (x1, y1, x2, y2)
-    crop_coordinates = (580, 0 , 1400, 1080)
+    crop_coordinates = (150, 0 , 500, 481)
 
     # Crop the input image based on predefined coordinates and get the path to the cropped image
-    cropped_image_path = detection.crop_input_image("img9.jpg", "cropped_img.jpg", crop_coordinates)
+    cropped_image_path = detection.crop_input_image("img.jpg", "cropped_img.jpg", crop_coordinates)
 
     # Perform YOLO detection on the cropped image
     results = detection.predict(source=cropped_image_path, device="cuda")
-    print(results)
+    result = [a * b for a, b in zip(results[0], trolley)]
+    print(result)
     
     # Show the YOLO output image
     detection.show_output_image()
