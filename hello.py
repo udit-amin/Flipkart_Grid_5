@@ -6,10 +6,10 @@ from PIL import Image
 import shutil
 
 # GRBL Arduino Connection
-ser_grbl = serial.Serial('COM7', 115200)  # Adjust COM port for GRBL Arduino
+ser_grbl = serial.Serial('COM8', 115200)  # Adjust COM port for GRBL Arduino
 
 # Switch Arduino Connection
-ser_switch = serial.Serial('COM8', 9600)  # Adjust COM port for Switch Arduino
+ser_switch = serial.Serial('COM7', 9600)  # Adjust COM port for Switch Arduino
 
 # Initialize the camera
 camera = cv2.VideoCapture(0)
