@@ -24,44 +24,44 @@ class GRBLComms:
             raise Exception("GRBL is not connected!")
         
         self.connection.write(f"{command}\r\n".encode())
-        message = ""
-        while self.connection.inWaiting():
-            message += self.connection.readline().decode()
-        return message
-
-    def homeMachine(self):
-        self.sendCommand("$H")
-
-    def moveMachine(self, x, y):
-        print(f'Moving machine to X:{x}, Y:{y}')
-
-        grbl.sendCommand(f'G00 X{x} Y{y}')
+    
+    def waitForMovementCompletion(self):
+        time.sleep(1)
         idleCounter = 0
 
         while True:
-            # TODO: add error handling and return False
-            # if machine does not reach desired location by chance
-            grbl.connection.reset_input_buffer()
-            response = grbl.sendCommand("?")
+            self.connection.reset_input_buffer()
             
-            print(f'Moving to X:{x} Y:{y}')
-            print(idleCounter)
-            # print(response)
+            self.sendCommand('?')
+            response = self.connection.readline().strip().decode()
 
             if response != 'ok':
                 if 'Idle' in response:
                     # machine has reached desired location
                     idleCounter += 1
 
-                if idleCounter >= 10:
-                    # count no of times machine reported to be idle
-                    break
+            if idleCounter >= 10:
+                # count no of times machine reported to be idle
+                break
+        return
+            
+
+    def homeMachine(self):
+        self.sendCommand("$H")
+        self.waitForMovementCompletion()
+
+    def moveMachine(self, x, y):
+        print(f'Moving machine to X:{x}, Y:{y}')
+
+        grbl.sendCommand(f'G00 X{x} Y{y}')
+
+        self.waitForMovementCompletion()
         
         print(f'reached X:{x} Y:{y}')
         return True
 
     def goToDropOff(self):
-        self.moveMachine(250, 0)
+        self.moveMachine(250, 15)
             
     def wakeupMachine(self):
         self.connection.write(b"\r\n\r\n")
@@ -84,8 +84,7 @@ if __name__ == "__main__":
 
     grbl.homeMachine()
     grbl.moveMachine(250, 50)
-    time.sleep(1)
     grbl.goToDropOff()
-
+    grbl.moveMachine(100, 100)
     
     grbl.disconnect()
