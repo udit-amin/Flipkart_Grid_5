@@ -28,7 +28,7 @@ class GRBLComms:
         
         self.connection.write(f"{command}\r\n".encode())
     
-    def waitForMovementCompletion(self):
+    def waitForMovementCompletion(self, message="Idle"):
         time.sleep(1)
         idleCounter = 0
 
@@ -38,6 +38,11 @@ class GRBLComms:
             self.sendCommand('?')
             response = self.connection.readline().strip().decode()
 
+            # when homing checks for "ok"
+            if response == message:
+                break
+
+            # when moving to (x, y) checks for "Idle"
             if response != 'ok':
                 if 'Idle' in response:
                     # machine has reached desired location
