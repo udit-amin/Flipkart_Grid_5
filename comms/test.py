@@ -1,13 +1,14 @@
 import serial
 import time
 
-PORT = "COM8"
+PORT = "COM9"
 BAUD_RATE = 115200
 
 class GRBLComms:
     def __init__(self, port, baudRate):
         self.port = port
         self.baudRate = baudRate
+        self.state = False # for Z-axis toggle
         self.connection = None
 
     def connect(self):
@@ -18,6 +19,8 @@ class GRBLComms:
         if self.connection:
             self.connection.close()
             self.connection = None
+        
+        print("Machine disconnected successfuly")
 
     def sendCommand(self, command):
         if not self.connection:
@@ -47,6 +50,7 @@ class GRBLComms:
             
 
     def homeMachine(self):
+        print(f'Homing machine')
         self.sendCommand("$H")
         self.waitForMovementCompletion()
 
@@ -75,16 +79,28 @@ class GRBLComms:
         return False
     
     def ZaxisRoutine(self):
-        pass
+        if self.state:
+            self.sendCommand("M3 S0") # can also be changed to "M5"
+        else:
+            self.sendCommand("M3 S1000")
+        self.state = not self.state
+        time.sleep(1) # this will require some fine tuning
 
 
 if __name__ == "__main__":
-    grbl = GRBLComms(PORT, BAUD_RATE)
-    grbl.connect()
 
-    grbl.homeMachine()
-    grbl.moveMachine(250, 50)
-    grbl.goToDropOff()
-    grbl.moveMachine(100, 100)
-    
-    grbl.disconnect()
+    try:
+        grbl = GRBLComms(PORT, BAUD_RATE)
+        grbl.connect()
+
+        # grbl.homeMachine()
+        grbl.moveMachine(50, 50)
+
+        for i in range(100):
+            grbl.ZaxisRoutine()
+            print(grbl.state)
+
+        grbl.disconnect()
+
+    except KeyboardInterrupt:
+        grbl.disconnect()
