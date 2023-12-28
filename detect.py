@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 from PIL import Image
 import shutil
+import cv2
 
 class Detection:
     def __init__(self, model_path):
@@ -30,24 +31,29 @@ class Detection:
     def cleanup(self):
         shutil.rmtree("./runs")
 
+camera = cv2.VideoCapture(0)
 # Usage:
 if __name__ == "__main__":
-    detection = Detection("best.pt")
+    detection = Detection("best_top.pt")
     
-    trolley = [600,430]
-    # Define the coordinates to crop the input image (x1, y1, x2, y2)
-    crop_coordinates = (150, 0 , 500, 481)
+    # trolley = [600,430]
+    # # Define the coordinates to crop the input image (x1, y1, x2, y2)
+    # crop_coordinates = (150, 0, 500, 481)
 
-    # Crop the input image based on predefined coordinates and get the path to the cropped image
-    cropped_image_path = detection.crop_input_image("img.jpg", "cropped_img.jpg", crop_coordinates)
+    # file_name = f"img9.jpg"
+    # _, frame = camera.read()
+    # cv2.imwrite(file_name, frame)
+    # print(f"Picture captured: {file_name}")
 
-    # Perform YOLO detection on the cropped image
-    results = detection.predict(source=cropped_image_path, device="cuda")
-    result = [a * b for a, b in zip(results[0], trolley)]
-    print(result)
+    # cropped_image_path = detection.crop_input_image(file_name, "./imgs/cropped_img.jpg", crop_coordinates)
+    # results = detection.predict(source=cropped_image_path, device="cuda")
+    results = detection.predict(source="img9.jpg", device="cuda")
+    print(results)
+    # x, y = results[0]
+    # print(x*430, y*600)
     
     # Show the YOLO output image
     detection.show_output_image()
 
     # Cleanup temporary files
-    detection.cleanup()
+    # detection.cleanup()

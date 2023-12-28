@@ -1,7 +1,7 @@
 import serial
 import time
 
-PORT = "COM9"
+PORT = "COM7"
 BAUD_RATE = 115200
 
 class GRBLComms:
@@ -44,6 +44,7 @@ class GRBLComms:
 
             # when moving to (x, y) checks for "Idle"
             if response != 'ok':
+                # print(response)
                 if 'Idle' in response:
                     # machine has reached desired location
                     idleCounter += 1
@@ -62,7 +63,7 @@ class GRBLComms:
     def moveMachine(self, x, y):
         print(f'Moving machine to X:{x}, Y:{y}')
 
-        grbl.sendCommand(f'G00 X{x} Y{y}')
+        self.sendCommand(f'G00 X{x} Y{y}')
 
         self.waitForMovementCompletion()
         
@@ -70,7 +71,7 @@ class GRBLComms:
         return True
 
     def goToDropOff(self):
-        self.moveMachine(250, 15)
+        self.moveMachine(275, 20)
             
     def wakeupMachine(self):
         self.connection.write(b"\r\n\r\n")
@@ -91,6 +92,16 @@ class GRBLComms:
         self.state = not self.state
         time.sleep(1) # this will require some fine tuning
 
+    def disableHardLimit(self):
+        self.sendCommand('$21 = 0')
+
+    def enableHardLimit(self):
+        self.sendCommand('$21 = 1')
+
+    def setZOff(self):
+        self.state = False
+        self.sendCommand("M3 S0")
+
 
 if __name__ == "__main__":
 
@@ -98,12 +109,18 @@ if __name__ == "__main__":
         grbl = GRBLComms(PORT, BAUD_RATE)
         grbl.connect()
 
-        # grbl.homeMachine()
-        grbl.moveMachine(50, 50)
+        grbl.homeMachine()
+        grbl.setZOff()
+        # grbl.moveMachine(100,270)
+        # time.sleep(60)
+        grbl.moveMachine(518, 518)
 
-        for i in range(100):
-            grbl.ZaxisRoutine()
-            print(grbl.state)
+        # for i in range(100):
+        #     grbl.ZaxisRoutine()
+        #     print(grbl.state)
+        # grbl.moveMachine(590,590)
+        
+        
 
         grbl.disconnect()
 

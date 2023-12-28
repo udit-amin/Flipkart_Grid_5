@@ -4,6 +4,7 @@ import time
 from ultralytics import YOLO
 from PIL import Image
 import shutil
+import * from comms.test
 
 # GRBL Arduino Connection
 ser_grbl = serial.Serial('COM8', 115200)  # Adjust COM port for GRBL Arduino
@@ -43,12 +44,7 @@ class Detection:
     def cleanup(self):
         shutil.rmtree("./runs")
 
-def send_to_grbl(ser, x, y):
-    command = f'G0 X{x} Y{y}\n'
-    ser.write(command.encode('ascii'))
-    print(f"Sent to GRBL: {command.strip()}")
-    response = ser.readline().decode('ascii').strip()
-    print(f"GRBL Response: {response}")
+
 
 if __name__ == "__main__":
     detection = Detection("best.pt")
@@ -76,11 +72,7 @@ if __name__ == "__main__":
             print(result)
             detection.show_output_image()
 
-            x_pixel, y_pixel = result
-            x_machine = x_pixel * 0.1  # Adjust scaling factor
-            y_machine = y_pixel * 0.1  # Adjust scaling factor
-            send_to_grbl(ser_grbl, x_machine, y_machine)
-
+            
             detection.cleanup()
 
         time.sleep(0.1)
