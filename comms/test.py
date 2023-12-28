@@ -58,7 +58,7 @@ class GRBLComms:
     def homeMachine(self):
         print(f'Homing machine')
         self.sendCommand("$H")
-        self.waitForMovementCompletion()
+        self.waitForMovementCompletion(message="ok")
 
     def moveMachine(self, x, y):
         print(f'Moving machine to X:{x}, Y:{y}')
