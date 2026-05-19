@@ -1,6 +1,6 @@
 # Flipkart Grid 5.0 — Robotics Challenge
 
-**Runner-Up | Flipkart Grid 5.0 Finals, IIT Madras (2023)**
+**Runner-Up | Flipkart Grid 5.0 Finals**
 
 Autonomous CNC Gantry system that detects boxes in a trolley using computer vision and places them on a conveyor belt — built entirely with a budget consumer webcam, no depth sensor.
 
